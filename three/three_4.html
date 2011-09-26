@@ -58,7 +58,7 @@
       var paused = false;
       var last = new Date().getTime();
       function animate(t) {
-        if (!paused || t-last < 16) {
+        if (!paused) {
           last = t;
           camera.position.set(
             Math.sin(t/1000)*300, 150, Math.cos(t/1000)*300);

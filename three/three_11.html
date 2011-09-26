@@ -94,7 +94,7 @@
       }
       renderer.autoClear = false;
       function animate(t) {
-        if (!paused || t-last < 16) {
+        if (!paused) {
           last = t;
           var gl = renderer.getContext();
           renderer.clear();

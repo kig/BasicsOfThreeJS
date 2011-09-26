@@ -100,7 +100,7 @@
         }
       }
       function animate(t) {
-        if (!paused || t-last < 16) {
+        if (!paused) {
           last = t;
           uniforms.time.value += 0.05;
           cube.rotation.y += 0.01;

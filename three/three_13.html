@@ -52,7 +52,6 @@
         skin = collada.skins[0];
         model.scale.set(0.1, 0.1, 0.1);
         model.rotation.x = -Math.PI/2;
-        model.updateMatrix();
         model.castShadow = model.receiveShadow = true;
         scene.addChild(model);
       });
@@ -101,7 +100,7 @@
       var st = 0;
       var skin = null;
       function animate(t) {
-        if (!paused || t-last < 16) {
+        if (!paused) {
           last = t;
           if ( st > 30 ) st = 0;
 

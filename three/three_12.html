@@ -152,7 +152,7 @@
       }
       renderer.autoClear = false;
       function animate(t) {
-        if (!paused || t-last < 16) {
+        if (!paused) {
           last = t;
           renderer.clear();
           renderer.render(scene, camera);

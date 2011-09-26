@@ -95,7 +95,7 @@
         }
       }
       function animate(t) {
-        if (!paused || t-last < 16) {
+        if (!paused) {
           last = t;
           litCube.position.y = 60-Math.sin(t/900)*25;
           litCube.position.x = Math.cos(t/600)*85;

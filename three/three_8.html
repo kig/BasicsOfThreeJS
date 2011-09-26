@@ -172,7 +172,7 @@
       var animating = false;
       window.ondblclick = function() { animating = !animating; };
       function animate(t) {
-        if (!paused || t-last < 16) {
+        if (!paused) {
           last = t;
           if (animating) {
             var v = pointGeo.vertices;

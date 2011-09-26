@@ -563,7 +563,6 @@ new ColladaLoader().load('models/monster.dae', function(collada) {
   var model = collada.scene;
   model.scale.set(0.1, 0.1, 0.1);
   model.rotation.x = -Math.PI/2;
-  model.updateMatrix();
   scene.addChild(model);
 });</pre>
     <p>Doesn't look too complicated.</p>
