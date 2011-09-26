@@ -30,7 +30,21 @@ Author: Eric Bidelman (ericbidelman@chromium.org)
 
 <section class='slides layout-regular'>
 
-  <article class="biglogo"></article>
+  <article class="biglogo">
+    <script>
+      (function() {
+        var c = document.createElement('canvas');
+        var ctx = null;
+        try {
+          ctx = c.getContext('webgl');
+        } catch(e) { }
+        try {
+          ctx = ctx || c.getContext('experimental-webgl');
+        } catch(e) { }
+        if (!ctx) alert("No WebGL detected, live demos disabled!");
+      })();
+    </script>
+  </article>
 
   <article id="title" class="title">
     <div>
