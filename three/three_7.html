@@ -1,0 +1,203 @@
+<html>
+  <head>
+    <script src="three.js/build/Three.js"></script>
+    <style type="text/css">
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+
+      #container {
+        position:absolute;
+        left:0px;
+        top:0px;
+        width:100%;
+        height:100%;
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+
+    <script src="raf.js"></script>
+
+  </head>
+
+  <body>
+    <script>
+      // <!--
+      function createTextCanvas(text, color, font, size) {
+        size = size || 24;
+        var canvas = document.createElement('canvas');
+        var ctx = canvas.getContext('2d');
+        var fontStr = (size + 'px ') + (font || 'Arial');
+        ctx.font = fontStr;
+        var w = ctx.measureText(text).width;
+        var h = Math.ceil(size*1.25);
+        canvas.width = w;
+        canvas.height = h;
+        ctx.font = fontStr;
+        ctx.fillStyle = color || 'black';
+        ctx.fillText(text, 0, size);
+        return canvas;
+      }
+
+      function createText2D(text, color, font, size, segW, segH) {
+        var canvas = createTextCanvas(text, color, font, size);
+        var plane = new THREE.PlaneGeometry(canvas.width, canvas.height, segW, segH);
+        var tex = new THREE.Texture(canvas);
+        tex.needsUpdate = true;
+        var planeMat = new THREE.MeshBasicMaterial({
+          map: tex, color: 0xffffff, transparent: true
+        });
+        var mesh = new THREE.Mesh(plane, planeMat);
+        mesh.doubleSided = true;
+        return mesh;
+      }
+
+      THREE.LeftAlign = 1;
+      THREE.CenterAlign = 0;
+      THREE.RightAlign = -1;
+      THREE.TopAlign = -1;
+      THREE.BottomAlign = 1;
+
+      function alignPlane(plane, horizontalAlign, verticalAlign) {
+        var obj = new THREE.Object3D();
+        var u = plane.geometry.vertices[0].position;
+        var v = plane.geometry.vertices[plane.geometry.vertices.length-1].position;
+        var width = Math.abs(u.x - v.x);
+        var height = Math.abs(u.y - v.y);
+        plane.position.x = (width/2) * horizontalAlign;
+        plane.position.y = (height/2) * verticalAlign;
+        obj.addChild(plane);
+        return obj;
+      }
+
+      var renderer = new THREE.WebGLRenderer({antialias: true});
+      var w = document.body.clientWidth;
+      var h = document.body.clientHeight;
+      renderer.setSize(w, h);
+      document.body.appendChild(renderer.domElement);
+
+      renderer.setClearColorHex(0xEEEEEE, 1.0);
+      renderer.shadowMapEnabled = true;
+      renderer.shadowMapWidth = 1024;
+      renderer.shadowMapHeight = 1024;
+      renderer.shadowCameraFov = 35;
+
+      var camera = new THREE.Camera( 45, w/h, 1, 10000 );
+      camera.position.z = 200;
+      camera.position.x = -100;
+      camera.position.y = 150;
+
+      var scene = new THREE.Scene();
+
+      var light = new THREE.SpotLight();
+      light.castShadow = true;
+      light.position.set( -170, 300, 100 );
+      scene.addLight(light);
+
+      var ambientLight = new THREE.PointLight(0x442255);
+      ambientLight.position.set(20, 150, -120);
+      scene.addLight(ambientLight);
+
+      var plane = new THREE.Mesh(
+        new THREE.CubeGeometry(180, 80, 180), 
+        new THREE.MeshLambertMaterial({color: 0xFFFFFF}));
+      plane.position.y = -40;
+      plane.receiveShadow = true;
+      plane.doubleSided = true;
+      scene.addChild(plane);
+
+      var grid = [];
+      for (var y=0; y<9; y++) {
+        grid[y] = [];
+        for (var x=0; x<9; x++) {
+          grid[y][x] = 10+Math.random()*(15+x*y);
+        }
+      }
+
+      var barGraph = new THREE.Object3D();
+      scene.addChild(barGraph);
+
+      var max = grid.reduce(function(s,i){ 
+        return Math.max(s, Math.max.apply(null, i)); 
+      }, grid[0][0]);
+      for (var j=0; j<grid.length; j++) {
+        var array = grid[j];
+        var title = alignPlane(createText2D(j), THREE.CenterAlign, THREE.CenterAlign);
+        title.scale.set(0.25, 0.25, 0.25);
+        title.position.x = (-1-(array.length-1)/2) * 16;
+        title.position.z = -(j-(grid.length-1)/2) * 16;
+        title.position.y = 1;
+        title.rotation.x = -Math.PI/2;
+        barGraph.addChild(title);
+      }
+      for (var j=0; j<grid[0].length; j++) {
+        var array = grid[0];
+        var c = String.fromCharCode(j+65);
+        var title = alignPlane(createText2D(c), THREE.CenterAlign, THREE.CenterAlign);
+        title.scale.set(0.25, 0.25, 0.25);
+        title.position.x = (j-(array.length-1)/2) * 16;
+        title.position.z = -(-1-(grid.length-1)/2) * 16;
+        title.position.y = 1;
+        title.rotation.x = -Math.PI/2;
+        barGraph.addChild(title);
+      }
+      for (var j=0; j<grid.length; j++) {
+        var array = grid[j];
+        for (var i=0; i<array.length; i++) {
+          var mat = new THREE.MeshLambertMaterial({color: 0xFFAA55});
+          var barHeight = array[i]/max * 80;
+          mat.color.setHSV(0.2 + 0.8*array[i]/max, 0.8, 1);
+          var geo = new THREE.CubeGeometry(8, barHeight, 8);
+          var mesh = new THREE.Mesh(geo, mat);
+          mesh.position.x = (i-(array.length-1)/2) * 16;
+          mesh.position.y = barHeight/2;
+          mesh.position.z = -(j-(grid.length-1)/2) * 16;
+          mesh.castShadow = mesh.receiveShadow = true;
+          barGraph.addChild(mesh);
+        }
+      }
+
+      renderer.render(scene, camera);
+      var paused = false;
+      var last = new Date().getTime();
+      var down = false;
+      var sx = 0, sy = 0;
+      var rot = Math.PI/3;
+      camera.position.x = Math.cos(rot)*170;
+      camera.position.z = Math.sin(rot)*170;
+      camera.target.position.y = 0;
+      window.onmousedown = function (ev){
+        down = true; sx = ev.clientX; sy = ev.clientY;
+      };
+      window.onmouseup = function(){ down = false; };
+      window.onmousemove = function(ev) {
+        if (down) {
+          var dx = ev.clientX - sx;
+          var dy = ev.clientY - sy;
+          rot += dx*0.01;
+          camera.position.x = Math.cos(rot)*170;
+          camera.position.z = Math.sin(rot)*170;
+          camera.position.y = Math.max(5, camera.position.y+dy);
+          sx += dx;
+          sy += dy;
+        }
+      }
+      function animate(t) {
+        if (!paused || t-last < 16) {
+          last = t;
+          renderer.clear();
+          renderer.render(scene, camera);
+        }
+        window.requestAnimationFrame(animate, renderer.domElement);
+      };
+      animate(new Date().getTime());
+      onmessage = function(ev) {
+        paused = (ev.data == 'pause');
+      };
+      // -->
+    </script>
+  </body>
+
+</html>

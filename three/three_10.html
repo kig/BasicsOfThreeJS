@@ -1,0 +1,81 @@
+<html>
+  <head>
+    <script src="three.js/build/Three.js"></script>
+    <style type="text/css">
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+    <script src="raf.js"></script>
+    <script src="dat-gui/build/DAT.GUI.min.js"></script>
+  </head>
+
+  <body>
+    <script>
+      var renderer = new THREE.WebGLRenderer({antialias: true});
+      renderer.setSize(document.body.clientWidth, document.body.clientHeight);
+      document.body.appendChild(renderer.domElement);
+      renderer.setClearColorHex(0xEEEEEE, 1.0);
+      renderer.clear();
+
+      var width = renderer.domElement.width;
+      var height = renderer.domElement.height;
+      var camera = new THREE.Camera( 45, width/height, 1, 10000 );
+      camera.position.z = 150;
+      camera.position.y = 30;
+      var scene = new THREE.Scene();
+
+      function v(x,y,z){ 
+        return new THREE.Vertex(new THREE.Vector3(x,y,z)); 
+      }
+      
+      var lineGeo = new THREE.Geometry();
+      lineGeo.vertices.push(
+        v(-50, 0, 0), v(50, 0, 0),
+        v(0, -50, 0), v(0, 50, 0),
+        v(0, 0, -50), v(0, 0, 50)
+      );
+      var lineMat = new THREE.LineBasicMaterial({
+        color: 0x000000, lineWidth: 1});
+      var line = new THREE.Line(lineGeo, lineMat);
+      line.type = THREE.Lines;
+      scene.addChild(line);
+
+      line.rotation.y = 0.5;
+
+      renderer.render(scene, camera);
+      var paused = false;
+      var last = new Date().getTime();
+      var down = false;
+      var sx = 0, sy = 0;
+      window.onmousedown = function (ev){
+        down = true; sx = ev.clientX; sy = ev.clientY;
+      };
+      window.onmouseup = function(){ down = false; };
+      window.onmousemove = function(ev) {
+        if (down) {
+          var dx = ev.clientX - sx;
+          var dy = ev.clientY - sy;
+          line.rotation.y += dx*0.01;
+          camera.position.y += dy;
+          sx += dx;
+          sy += dy;
+        }
+      }
+      function animate(t) {
+        if (!paused || t-last < 16) {
+          last = t;
+          renderer.clear();
+          renderer.render(scene, camera);
+        }
+        window.requestAnimationFrame(animate, renderer.domElement);
+      };
+      animate(new Date().getTime());
+      onmessage = function(ev) {
+        paused = (ev.data == 'pause');
+      };
+    </script>
+  </body>
+
+</html>

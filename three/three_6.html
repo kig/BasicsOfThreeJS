@@ -1,0 +1,120 @@
+<html>
+  <head>
+    <script src="three.js/build/Three.js"></script>
+    <style type="text/css">
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+
+      #container {
+        position:absolute;
+        left:0px;
+        top:0px;
+        width:100%;
+        height:100%;
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+
+    <script src="raf.js"></script>
+    <script type="text/x-glsl-es-frag" id="fragment">
+      varying float vZ;
+      uniform float time;
+      uniform vec2 size;
+      void main() {
+        vec2 d = gl_FragCoord.xy - (0.5+0.01*sin(time))*size;
+        float a = sin(time*0.3)*2.0*3.14159;
+        d = vec2( d.x*cos(a) + d.y*sin(a),
+                 -d.x*sin(a) + d.y*cos(a));
+        vec2 rg = vec2(1.0)-abs(d)/(0.5*size.xx);
+        float b = abs(vZ) / 160.0;
+        gl_FragColor = vec4(rg,b,1.0);
+      }
+    </script>
+    <script type="text/x-glsl-es-vert" id="vertex">
+      varying float vZ;
+      uniform float time;
+      void main() {
+        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+        mvPosition.y += 20.0*sin(time*0.5+mvPosition.x/25.0);
+        mvPosition.x += 30.0*cos(time*0.5+mvPosition.y/25.0);
+        vec4 p = projectionMatrix * mvPosition;
+        vZ = p.z;
+        gl_Position = p;
+      }
+    </script>
+
+  </head>
+
+  <body>
+    <script>
+      var renderer = new THREE.WebGLRenderer({antialias: true});
+      renderer.setSize(document.body.clientWidth, document.body.clientHeight);
+      document.body.appendChild(renderer.domElement);
+      renderer.setClearColorHex(0xEEEEEE, 1.0);
+      renderer.clear();
+
+      var fov = 45; // camera field-of-view in degrees
+      var width = renderer.domElement.width;
+      var height = renderer.domElement.height;
+      var aspect = width / height; // view aspect ratio
+      var near = 1; // near clip plane
+      var far = 10000; // far clip plane
+      var camera = new THREE.Camera( fov, aspect, near, far );
+      camera.position.z = 160;
+      camera.position.y = 40;
+      camera.position.x = 40;
+      var scene = new THREE.Scene();
+
+      var uniforms = {
+        time : { type: "f", value: 1.0 },
+        size : { type: "v2", value: new THREE.Vector2(width,height) }
+      };
+      var cube = new THREE.Mesh(
+        new THREE.CubeGeometry(50, 50, 50, 20,20,20),
+        new THREE.MeshShaderMaterial({
+          uniforms : uniforms,
+          vertexShader : document.getElementById('vertex').textContent,
+          fragmentShader : document.getElementById('fragment').textContent
+        }));
+      scene.addChild(cube);
+
+      renderer.render(scene, camera);
+      var paused = false;
+      var last = new Date().getTime();
+      var down = false;
+      var sx = 0, sy = 0;
+      window.onmousedown = function (ev){
+        down = true; sx = ev.clientX; sy = ev.clientY;
+      };
+      window.onmouseup = function(){ down = false; };
+      window.onmousemove = function(ev) {
+        if (down) {
+          var dx = ev.clientX - sx;
+          var dy = ev.clientY - sy;
+          camera.position.z += dx;
+          sx += dx;
+          sy += dy;
+        }
+      }
+      function animate(t) {
+        if (!paused || t-last < 16) {
+          last = t;
+          uniforms.time.value += 0.05;
+          cube.rotation.y += 0.01;
+          cube.rotation.z += 0.02;
+          renderer.clear();
+          renderer.render(scene, camera);
+        }
+        window.requestAnimationFrame(animate, renderer.domElement);
+      };
+      animate(new Date().getTime());
+      onmessage = function(ev) {
+        paused = (ev.data == 'pause');
+      };
+    </script>
+  </body>
+
+</html>

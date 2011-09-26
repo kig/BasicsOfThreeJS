@@ -1,0 +1,77 @@
+<html>
+  <head>
+    <script src="three.js/build/Three.js"></script>
+    <style type="text/css">
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+
+      #container {
+        position:absolute;
+        left:0px;
+        top:0px;
+        width:100%;
+        height:100%;
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+
+    <script src="raf.js"></script>
+
+  </head>
+
+  <body>
+    <script>
+      var renderer = new THREE.WebGLRenderer({antialias: true});
+      renderer.setSize(document.body.clientWidth, document.body.clientHeight);
+      document.body.appendChild(renderer.domElement);
+      renderer.setClearColorHex(0xEEEEEE, 1.0);
+      renderer.clear();
+      var fov = 45; // camera field-of-view in degrees
+      var width = renderer.domElement.width;
+      var height = renderer.domElement.height;
+      var aspect = width / height; // view aspect ratio
+      var near = 1; // near clip plane
+      var far = 10000; // far clip plane
+      var camera = new THREE.Camera( fov, aspect, near, far );
+      camera.position.z = 300;
+      var scene = new THREE.Scene();
+      var cube = new THREE.Mesh(
+        new THREE.CubeGeometry(50,50,50),
+        new THREE.MeshBasicMaterial({color: 0x000000, opacity: 1})
+      );
+      scene.addChild(cube);
+
+      var light = new THREE.SpotLight();
+      light.position.set( 170, 330, -160 );
+      scene.addLight(light);
+      var litCube = new THREE.Mesh(
+        new THREE.CubeGeometry(50, 50, 50),
+        new THREE.MeshLambertMaterial({color: 0xffffff}));
+      litCube.position.y = 50;
+      scene.addChild(litCube);
+
+
+      renderer.render(scene, camera);
+      var paused = false;
+      var last = new Date().getTime();
+      function animate(t) {
+        if (!paused || t-last < 16) {
+          last = t;
+          camera.position.set(
+            Math.sin(t/1000)*300, 150, Math.cos(t/1000)*300);
+          renderer.clear();
+          renderer.render(scene, camera);
+        }
+        window.requestAnimationFrame(animate, renderer.domElement);
+      };
+      animate(new Date().getTime());
+      onmessage = function(ev) {
+        paused = (ev.data == 'pause');
+      };
+    </script>
+  </body>
+
+</html>

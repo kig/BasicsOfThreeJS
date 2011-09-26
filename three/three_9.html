@@ -1,0 +1,102 @@
+<html>
+  <head>
+    <script src="three.js/build/Three.js"></script>
+    <style type="text/css">
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+
+      #container {
+        position:absolute;
+        left:0px;
+        top:0px;
+        width:100%;
+        height:100%;
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+
+    <script src="raf.js"></script>
+
+  </head>
+
+  <body>
+    <script>
+      var renderer = new THREE.WebGLRenderer({antialias: true});
+      renderer.setSize(document.body.clientWidth, document.body.clientHeight);
+      document.body.appendChild(renderer.domElement);
+      renderer.setClearColorHex(0xEEEEEE, 1.0);
+      renderer.clear();
+      var fov = 45; // camera field-of-view in degrees
+      var width = renderer.domElement.width;
+      var height = renderer.domElement.height;
+      var aspect = width / height; // view aspect ratio
+      var near = 1; // near clip plane
+      var far = 10000; // far clip plane
+      var camera = new THREE.Camera( fov, aspect, near, far );
+      camera.position.z = 500;
+      camera.position.y = 150;
+      var scene = new THREE.Scene();
+
+      var c = document.createElement('canvas');
+      var ctx = c.getContext('2d');
+      ctx.font = '64px Arial';
+      var s = 'Hello, world!';
+      c.width = ctx.measureText(s).width;
+      c.height = Math.ceil(64*1.25);
+      ctx.font = '64px Arial';
+      ctx.fillText(s, 0, 64);
+      
+      var tex = new THREE.Texture(c);
+      tex.needsUpdate = true;
+      
+      var mat = new THREE.MeshBasicMaterial({map: tex});
+      mat.transparent = true;
+
+      var titleQuad = new THREE.Mesh(
+        new THREE.PlaneGeometry(c.width, c.height),
+        mat
+      );
+      titleQuad.doubleSided = true;
+
+      scene.addChild(titleQuad);
+
+      titleQuad.rotation.y = 0.5;
+
+      renderer.render(scene, camera);
+      var paused = false;
+      var last = new Date().getTime();
+      var down = false;
+      var sx = 0, sy = 0;
+      window.onmousedown = function (ev){
+        down = true; sx = ev.clientX; sy = ev.clientY;
+      };
+      window.onmouseup = function(){ down = false; };
+      window.onmousemove = function(ev) {
+        if (down) {
+          var dx = ev.clientX - sx;
+          var dy = ev.clientY - sy;
+          titleQuad.rotation.y += dx*0.01;
+          camera.position.y += dy;
+          sx += dx;
+          sy += dy;
+        }
+      }
+      function animate(t) {
+        if (!paused || t-last < 16) {
+          last = t;
+          renderer.clear();
+          renderer.render(scene, camera);
+        }
+        window.requestAnimationFrame(animate, renderer.domElement);
+      };
+      animate(new Date().getTime());
+      onmessage = function(ev) {
+        paused = (ev.data == 'pause');
+      };
+    </script>
+  </body>
+
+</html>

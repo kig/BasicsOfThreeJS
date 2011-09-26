@@ -1,0 +1,171 @@
+<html>
+  <head>
+    <script src="three.js/build/Three.js"></script>
+    <style type="text/css">
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+    <script src="raf.js"></script>
+    <script src="dat-gui/build/DAT.GUI.min.js"></script>
+  </head>
+
+  <body>
+    <script>
+      // <!--
+      function v(x,y,z){ 
+        return new THREE.Vertex(new THREE.Vector3(x,y,z)); 
+      }
+
+      var renderer = new THREE.WebGLRenderer({antialias: true});
+      renderer.setSize(document.body.clientWidth, document.body.clientHeight);
+      document.body.appendChild(renderer.domElement);
+      renderer.setClearColorHex(0xEEEEEE, 1.0);
+      renderer.shadowMapEnabled = true;
+      renderer.shadowMapWidth = renderer.shadowMapHeight = 1024;
+      renderer.shadowMapFov = 30;
+
+      var width = renderer.domElement.width;
+      var height = renderer.domElement.height;
+      var camera = new THREE.Camera( 45, width/height, 1, 10000 );
+      camera.position.y = 30;
+      var scene = new THREE.Scene();
+      var coordScene = new THREE.Scene();
+      coordScene.fog = new THREE.FogExp2(0xEEEEEE, 0.0035);
+      var lineGeo = new THREE.Geometry();
+      lineGeo.vertices.push(
+        v(-500, 0, 0), v(500, 0, 0), v(50,0,0), v(45,5,0), v(50,0,0), v(45,-5,0),
+        v(0, -500, 0), v(0, 500, 0), v(0,50,0), v(5,45,0), v(0,50,0), v(-5,45,0),
+        v(0, 0, -500), v(0, 0, 500), v(0,0,50), v(5,0,45), v(0,0,50), v(-5,0,45)
+      );
+      var lineMat = new THREE.LineBasicMaterial({
+        color: 0x888888, lineWidth: 1});
+      var line = new THREE.Line(lineGeo, lineMat);
+      line.type = THREE.Lines;
+      coordScene.addChild(line);
+
+      var light = new THREE.SpotLight(0xFFFFFF);
+      light.position.set(150, 200, 300);
+      light.castShadow = true;
+      scene.addLight(light);
+
+      var ambient = new THREE.PointLight(0x333366);
+      ambient.position.set(-150, -200, -300);
+      scene.addLight(ambient);
+
+      var gui = new DAT.GUI({width:160});
+
+      var controller = new THREE.Object3D();
+      controller.objects = [];
+      controller.scene = scene;
+      controller.gui = gui;
+      controller.color = 0xFFFFFF;
+      controller.createNew = function() {
+        var cube = new THREE.Mesh(
+          new THREE.CubeGeometry(20,20,20),
+          new THREE.MeshPhongMaterial({color: 0xFFFFFF})
+        );
+        cube.castShadow = cube.receiveShadow = true;
+        this.scene.addChild(cube);
+        this.objects.push(cube);
+        this.setCurrent(cube);
+      };
+      controller.setCurrent = function(current) {
+        if (this.current)
+          this.current.materials[0].ambient.setHex(0x000000);
+        this.current = current;
+        if (this.current) {
+          this.current.materials[0].ambient.setHex(0x888800);
+          this.x.setValue(current.position.x);
+          this.y.setValue(current.position.y);
+          this.z.setValue(current.position.z);
+          this.sX.setValue(current.scale.x);
+          this.sY.setValue(current.scale.y);
+          this.sZ.setValue(current.scale.z);
+        }
+      };
+      controller.proxy = function(propertyChain) {
+        var controller = this;
+        var tgt = controller;
+        for (var i=0; i<propertyChain.length-1; i++) {
+          tgt = tgt[propertyChain[i]];
+        }
+        var last = propertyChain[propertyChain.length-1];
+        return this.gui.add(tgt, last).onChange(function(v) {
+          var t = controller.current;
+          for (var i=0; i<propertyChain.length-1; i++) {
+            t = t[propertyChain[i]];
+          }
+          t[last] = v;
+        });
+      }
+
+      controller.x = controller.proxy(['position', 'x']).min(-50).max(50);
+      controller.y = controller.proxy(['position', 'y']).min(-50).max(50);
+      controller.z = controller.proxy(['position', 'z']).min(-50).max(50);
+
+      controller.sX = controller.proxy(['scale', 'x']).min(0.1).max(6).step(0.1).name('Width');
+      controller.sY = controller.proxy(['scale', 'y']).min(0.1).max(6).step(0.1).name('Height');
+      controller.sZ = controller.proxy(['scale', 'z']).min(0.1).max(6).step(0.1).name('Depth');
+
+      gui.add(controller, 'createNew');
+
+      controller.createNew();
+
+
+      renderer.render(scene, camera);
+      var paused = false;
+      var last = new Date().getTime();
+      var down = false;
+      var sx = 0, sy = 0;
+      var rotation = 1;
+      var projector = new THREE.Projector();
+      camera.position.x = Math.cos(rotation)*150;
+      camera.position.z = Math.sin(rotation)*150;
+      window.onmousedown = function (ev){
+        if (ev.target == renderer.domElement) {
+          down = true;
+          sx = ev.clientX;
+          sy = ev.clientY;
+          var v = new THREE.Vector3((sx/width) * 2 - 1, -(sy/height) * 2 + 1, 0.5);
+          projector.unprojectVector(v, camera);
+          var ray = new THREE.Ray(camera.position, v.subSelf(camera.position).normalize());
+          var intersects = ray.intersectObjects(controller.objects);
+          if (intersects.length > 0) {
+            controller.setCurrent(intersects[0].object);
+          }
+        }
+      };
+      window.onmouseup = function(){ down = false; };
+      window.onmousemove = function(ev) {
+        if (down) {
+          var dx = ev.clientX - sx;
+          var dy = ev.clientY - sy;
+          rotation += dx/100;
+          camera.position.x = Math.cos(rotation)*150;
+          camera.position.z = Math.sin(rotation)*150;
+          camera.position.y += dy;
+          sx += dx;
+          sy += dy;
+        }
+      }
+      renderer.autoClear = false;
+      function animate(t) {
+        if (!paused || t-last < 16) {
+          last = t;
+          renderer.clear();
+          renderer.render(scene, camera);
+          renderer.render(coordScene, camera);
+        }
+        window.requestAnimationFrame(animate, renderer.domElement);
+      };
+      animate(new Date().getTime());
+      onmessage = function(ev) {
+        paused = (ev.data == 'pause');
+      };
+      // -->
+    </script>
+  </body>
+
+</html>

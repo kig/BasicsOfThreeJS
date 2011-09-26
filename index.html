@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<!--
+Copyright 2011 Google Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Author: Eric Bidelman (ericbidelman@chromium.org)
+-->
+<html>
+<head>
+  <title>Introduction to Three.js</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <script src='slides.js'></script>
+  <link href="http://fonts.googleapis.com/css?family=Raleway:100" rel="stylesheet" type="text/css">
+  <link href="http://fonts.googleapis.com/css?family=Open+Sans:300" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:regular,semibold,italic,italicsemibold|Droid+Sans+Mono&v2">
+</head>
+<body style="display: none">
+
+<section class='slides layout-regular'>
+
+  <article class="biglogo"></article>
+
+  <article id="title" class="title">
+    <div>
+      <h1>Three.js basics</h1>
+      <h2 class="subtitle">Ilmari Heikkinen</h2>
+      <h3 class="subtitle"><img style="height:60px; padding-left:70px;" src="images/google_logo.png"></h3>
+    </div>
+  </article>
+
+  <article>
+    <h3>Who am I?</h3>
+    <p>Ilmari Heikkinen</p>
+    <p>@ilmarihei | fhtr.org/plus | fhtr.org</p>
+    <p>Google Chrome Developer Programs Engineer</p>
+    <br><br>
+    <p>I write demos, do presentations, write articles</p>
+    <br><br>
+    <p>Slides available at <a href="http://fhtr.org/BasicsOfThreeJS">fhtr.org/BasicsOfThreeJS</a></p>
+      
+  </article>
+
+  <article class="title">
+    <h2>Three.js?</h2>
+  </article>
+
+  <article>
+    <h3>Three.js is a JS 3D Engine</h3>
+    <ul>
+      <li><a href="https://github.com/mrdoob/three.js/">github.com/mrdoob/three.js</a></li>
+      <li>Lightweight</li>
+      <li>Easy to use</li>
+      <li>Batteries included</li>
+      <li>WebGL renderer (our focus today)</li>
+      <li>Also has Canvas and SVG renderers</li>
+    </ul>
+  </article>
+
+  <article class="title">
+    <h2>Basic setup</h2>
+  </article>
+
+  <article>
+    <h3>Renderer</h3>
+    <p>Create a WebGLRenderer</p>
+    <pre>
+      var renderer = new THREE.WebGLRenderer({antialias: true});
+      renderer.setSize(document.body.clientWidth, 
+                       document.body.clientHeight);</pre>
+    <p>Plug it in</p>
+    <pre>
+      document.body.appendChild(renderer.domElement);</pre>
+    <p>And make it pretty</p>
+    <pre>
+      renderer.setClearColorHex(0xEEEEEE, 1.0);
+      renderer.clear();</pre>
+  </article>
+
+  <article>
+    <h3>Wow!</h3>
+    <iframe src="three/three_1.html"></iframe>
+  </article>
+
+  <article>
+    <h3>It gets better, I promise!</h3>
+    <div>
+    <p>Create a Camera</p>
+    <pre>
+      // new THREE.Camera( FOV, viewAspectRatio, zNear, zFar );
+      var camera = new THREE.Camera( 45, width/height, 1, 10000 );
+      camera.position.z = 300;</pre>
+    <p>Make a Scene with a Cube</p>
+    <pre>
+      var scene = new THREE.Scene();
+      var cube = new THREE.Mesh(new THREE.CubeGeometry(50,50,50),
+                     new THREE.MeshBasicMaterial({color: 0x000000}));
+      scene.addChild(cube);</pre>
+    <p>And render the Scene from the Camera</p>
+    <pre>
+      renderer.render(scene, camera);</pre>
+    </div>
+  </article>
+
+  <article>
+    <h3>At least it isn't empty.</h3>
+    <iframe src="three/three_2.html"></iframe>
+  </article>
+
+  <article>
+    <h3>Recap</h3>
+    <p>Create a renderer <code>new THREE.WebGLRenderer()</code></p>
+    <p>Create a camera <code>new THREE.Camera(fov, aspect, near, far)</code></p>
+    <p>Create a scene <code>new THREE.Scene()</code></p>
+    <p>Create a mesh with a geometry and a material<code><br>new THREE.Mesh(new THREE.CubeGeometry(w,h,d),<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new THREE.MeshBasicMaterial({color: 0x000000}))</code>
+    </p>
+    <p>Add the mesh to the scene <code>scene.addChild(mesh)</code></p>
+    <p>Render the scene <code>renderer.render(scene, camera)</code></p>
+    <p>Add the renderer canvas to the page <code>document.body.appendChild(renderer.domElement)</code></p>
+  </article>
+
+  <article class="title">
+    <h2>Animation</h2>
+  </article>
+
+  <article>
+    <h3>Can we make it move?</h3>
+    <p>Yes we can!</p>
+    <p class="small">(But it's a manual process.)</p>
+    <pre>
+      function animate(t) {
+        // spin the camera in a circle
+        camera.position.x = Math.sin(t/1000)*300;
+        camera.position.y = 150;
+        camera.position.z = Math.cos(t/1000)*300;
+        // renderer automatically clears unless autoClear = false
+        renderer.render(scene, camera);
+        window.requestAnimationFrame(animate, renderer.domElement);
+      };
+      animate(new Date().getTime());
+    </pre>
+  </article>
+
+  <article>
+    <h3>Isn't it nice?</h3>
+    <iframe src="three/three_3.html"></iframe>
+  </article>
+
+  <article>
+    <h3>requestAnimationFrame?</h3>
+    <pre>requestAnimationFrame(function(time){}, element)</pre>
+    <p>It's like <code>setTimeout(f, timeUntilNextFrame)</code></p>
+    <p>Except that:</p>
+    <ul class="build">
+    <li>The browser knows when the next frame is drawn</li>
+    <div> &rarr; calls callback at screen refresh rate or lower<br><br></div>
+    <li>The browser knows when an element is on the screen</li>
+    <div> &rarr; only calls callback when the element is visible</div>
+    </ul>
+  </article>
+
+  <article class="title">
+    <h2>Lighting</h2>
+  </article>
+
+  <article>
+    <h3>Lights</h3>
+    <p>Without light, our scene is very forlorn.</p>
+    <p>Let's create a Light</p>
+    <pre>
+      var light = new THREE.SpotLight();
+      light.position.set( 170, 330, -160 );
+      scene.addLight(light);</pre>
+    <p>And a lit cube</p>
+    <pre>
+      var litCube = new THREE.Mesh(
+        new THREE.CubeGeometry(50, 50, 50),
+        new THREE.MeshLambertMaterial({color: 0xFFFFFF}));
+      litCube.position.y = 50;
+      scene.addChild(litCube);</pre>
+  </article>
+
+  <article>
+    <h3>There we go!</h3>
+    <iframe src="three/three_4.html"></iframe>
+  </article>
+
+  <article>
+    <h3>How about shadows?</h3>
+    <p>Three.js has shadow maps.</p>
+    <p>You need to enable them per-light and per-object.</p>
+    <p>The shadows only work on SpotLights.</p>
+    <pre>
+      // enable shadows on the renderer
+      renderer.shadowMapEnabled = true;
+
+      // enable shadows for a light
+      light.castShadow = true;
+
+      // enable shadows for an object
+      litCube.castShadow = true;
+      litCube.receiveShadow = true;</pre>
+  </article>
+
+  <article>
+    <h3>Added interest</h3>
+    <p>Let's add a ground plane</p>
+    <pre>
+  var planeGeo = new THREE.PlaneGeometry(400, 200, 10, 10);
+  var planeMat = new THREE.MeshLambertMaterial({color: 0xFFFFFF});
+  var plane = new THREE.Mesh(planeGeo, planeMat);
+  plane.rotation.x = -Math.PI/2;
+  plane.position.y = -25;
+  plane.receiveShadow = true;
+  scene.addChild(plane);</pre>
+    <p>And make the cube spin</p>
+    <pre>
+  litCube.position.x = Math.cos(t/600)*85;
+  litCube.position.y = 60-Math.sin(t/900)*25;
+  litCube.position.z = Math.sin(t/600)*85;
+  litCube.rotation.x = t/500;
+  litCube.rotation.y = t/800;</pre>
+  </article>
+
+  <article>
+    <h3>Plus a couple of tweaks</h3>
+    <iframe src="three/three_5.html"></iframe>
+  </article>
+
+  <article>
+    <h3>Lighting recap</h3>
+    <p>Set mesh material to <code>new THREE.MeshLambertMaterial</code> or <code>new THREE.MeshPhongMaterial</code></p>
+    <p>Create a light <code>new THREE.SpotLight(color)</code></p>
+    <p>Add the light to the scene <code>scene.addLight(light)</code></p>
+    <p>Turn on shadows if you need them</p>
+    <pre>
+      scene.shadowMapEnabled = true;
+      light.castShadow = true;
+      object.castShadow = true;
+      object.receiveShadow = true;</pre>
+  </article>
+
+  <article class="title">
+    <h2>Shaders</h2>
+  </article>
+
+  <article>
+    <h3>What are shaders</h3>
+    <p>Shaders are small programs that tell WebGL</p>
+    <br>
+    <center class="build">
+      <p>where to draw</p>
+      <p class="small">and</p>
+      <p>what to draw<br><br></p>
+      <p style="text-align:left;">Shaders are written in GLSL, the GL Shading Language.</p>
+      <p style="text-align:left;">It's kinda like C for graphics.</p>
+    </center>
+  </article>
+
+  <article>
+    <h3>Vertex shader</h3>
+    <p>Where to draw.</p>
+    <p>Projects geometry to screen coordinates.</p>
+    <pre>
+    &lt;script id="vertex" type="text/x-glsl-vert">
+      varying float vZ;
+      uniform float time;
+      void main() {
+        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+        mvPosition.y += 20.0*sin(time*0.5+mvPosition.x/25.0);
+        mvPosition.x += 30.0*cos(time*0.5+mvPosition.y/25.0);
+        vec4 p = projectionMatrix * mvPosition;
+        vZ = p.z;
+        gl_Position = p;
+      }
+    &lt;/script></pre>
+  </article>
+
+  <article>
+    <h3>Fragment shader</h3>
+    <p>What to draw.</p>
+    <p>Computes the color of a pixel.</p>
+    <pre>
+    &lt;script id="fragment" type="text/x-glsl-frag">
+      varying float vZ;
+      uniform float time;
+      uniform vec2 size;
+      void main() {
+        vec2 d = gl_FragCoord.xy - (0.5+0.02*sin(time))*size;
+        float a = sin(time*0.3)*2.0*3.14159;
+        d = vec2( d.x*cos(a) + d.y*sin(a),
+                 -d.x*sin(a) + d.y*cos(a));
+        vec2 rg = vec2(1.0)-abs(d)/(0.5*size)
+        float b = abs(vZ) / 160.0;
+        gl_FragColor = vec4(rg,b,1.0);
+      }
+    &lt;/script></pre>
+  </article>
+
+  <article>
+    <h3>Shaders and Three.js</h3>
+    <p>Use a MeshShaderMaterial</p>
+    <pre>
+var uniforms = {
+  time : { type: "f", value: 1.0 },
+  size : { type: "v2", value: new THREE.Vector2(width,height) }
+};
+
+var shaderMaterial = new THREE.MeshShaderMaterial({
+  uniforms : uniforms,
+  vertexShader : $('#vertex').text(),
+  fragmentShader : $('#fragment').text()
+});
+
+var meshCube = new THREE.Mesh(
+  new THREE.CubeGeometry(50,50,50, 20,20,20), // 20 segments
+  shaderMaterial
+);</pre>
+  </article>
+
+  <article>
+    <h3>Animating shader uniforms</h3>
+    <p>Change the uniform value</p>
+    <pre>
+      uniforms.time.value += 0.05;</pre>
+    <p>And for the size, add a resize listener</p>
+    <pre>
+      window.addEventListener('resize', function() {
+        uniforms.size.value.x = window.innerWidth;
+        uniforms.size.value.y = window.innerHeight;
+      }, false);</pre>
+  </article>
+
+  <article>
+    <h3>It's very colourful</h3>
+    <iframe src="three/three_6.html"></iframe>
+  </article>
+
+  <article class="title">
+    <h2>Useful uses</h2>
+  </article>
+
+  <article>
+    <h3>Bar graph</h3>
+    <pre>
+      var grid = /* 2D Array */
+      var barGraph = new THREE.Object3D();
+      scene.addChild(barGraph);
+
+      var max = /* Grid max value */
+      var mat = new THREE.MeshLambertMaterial({color: 0xFFAA55});
+      for (var j=0; j&lt;grid.length; j++) {
+        for (var i=0; i&lt;grid[j].length; i++) {
+          var barHeight = grid[j][i]/max * 80;
+          var geo = new THREE.CubeGeometry(8, barHeight, 8);
+          var mesh = new THREE.Mesh(geo, mat);
+          mesh.position.x = (i-grid[j].length/2) * 16;
+          mesh.position.y = barHeight/2;
+          mesh.position.z = -(j-grid.length/2) * 16;
+          mesh.castShadow = mesh.receiveShadow = true;
+          barGraph.addChild(mesh);
+        }
+      }</pre>
+  </article>
+  
+  <article>
+    <h3>Bar graph in action</h3>
+    <iframe src="three/three_7.html"></iframe>
+  </article>
+
+  <article>
+    <h3>Scatter plot</h3>
+    <pre>
+var scatterPlot = new THREE.Object3D();
+var mat = new THREE.ParticleBasicMaterial(
+  {vertexColors: true, size: 1.5});
+
+var pointCount = 10000;
+var pointGeo = new THREE.Geometry();
+for (var i=0; i&lt;pointCount; i++) {
+  var x = Math.random() * 100 - 50;
+  var y = x*0.8+Math.random() * 20 - 10;
+  var z = x*0.7+Math.random() * 30 - 15;
+  pointGeo.vertices.push(new THREE.Vertex(new THREE.Vector3(x,y,z)));
+  pointGeo.colors.push(new THREE.Color().setHSV(
+    (x+50)/100, (z+50)/100, (y+50)/100));
+}
+var points = new THREE.ParticleSystem(pointGeo, mat);
+scatterPlot.addChild(points);
+scene.fog = new THREE.FogExp2(0xFFFFFF, 0.0035);</pre>
+  </article>
+
+  <article>
+    <h3>Scatter plot in action</h3>
+    <iframe src="three/three_8.html"></iframe>
+    <p class="small">Double-click to animate</p>
+  </article>
+
+  <article>
+    <h3>How to do text</h3>
+    <p>Create a canvas, draw text on it, use as texture.</p>
+    <pre>
+      var c = document.createElement('canvas');
+      c.getContext('2d').font = '50px Arial';
+      c.getContext('2d').fillText('Hello, world!', 2, 50);
+
+      var tex = new THREE.Texture(c);
+      tex.needsUpdate = true;
+      
+      var mat = new THREE.MeshBasicMaterial({map: tex});
+      mat.transparent = true;
+
+      var titleQuad = new THREE.Mesh(
+        new THREE.PlaneGeometry(c.width, c.height),
+        mat
+      );
+      titleQuad.doubleSided = true;</pre>
+  </article>
+
+  <article>
+    <h3>Hello, world!</h3>
+    <iframe src="three/three_9.html"></iframe>
+  </article>
+
+  <article>
+    <h3>And the lines?</h3>
+    <p>Create a geometry, add vertices, use to make a THREE.Line.</p>
+    <pre>
+      function v(x,y,z){ 
+        return new THREE.Vertex(new THREE.Vector3(x,y,z)); 
+      }
+      
+      var lineGeo = new THREE.Geometry();
+      lineGeo.vertices.push(
+        v(-50, 0, 0), v(50, 0, 0),
+        v(0, -50, 0), v(0, 50, 0),
+        v(0, 0, -50), v(0, 0, 50)
+      );
+      var lineMat = new THREE.LineBasicMaterial({
+        color: 0x000000, lineWidth: 1});
+      var line = new THREE.Line(lineGeo, lineMat);
+      line.type = THREE.Lines;
+      scene.addChild(line);</pre>
+  </article>
+  
+  <article>
+    <h3>Coordinate axes</h3>
+    <iframe src="three/three_10.html"></iframe>
+  </article>
+
+  <article class="title">
+    <h2>GUI controls</h2>
+  </article>
+
+  <article>
+    <h3>GUI controls</h3>
+    <p>To me, GUI controls have been a pain.</p>
+    <p>Write your own widgets, write your own onchange handlers, write your own interval change polling logic, style it all, hope it scales, gaaaaaah!</p>
+    <p>Let's just use DAT.GUI instead.</p>
+    <pre>
+      var gui = new DAT.GUI();
+      gui.add(cube.scale, 'x').min(0.1).max(10).step(0.1);
+      gui.add(cube.scale, 'y', 0.1, 10, 0.1);
+      gui.add(cube.scale, 'z', 0.1, 10, 0.1);</pre>
+    <p>Done!</p>
+    <p><a href="http://code.google.com/p/dat-gui">code.google.com/p/dat-gui</a></p>
+  </article>
+
+  <article>
+    <h3>Scalable cube</h3>
+    <iframe src="three/three_11.html"></iframe>
+  </article>
+
+  <article>
+    <h3>But but, where is the <i>pain</i>?</h3>
+    <p>Well, we could do a proxy to control only the currently selected object.</p>
+    <pre>
+var controller = new THREE.Object3D();
+var gui = new DAT.GUI({width: 160});
+
+controller.setCurrent = function(current) {
+  this.current = current;
+  this.x.setValue(current.position.x);
+  this.y.setValue(current.position.y);
+  this.z.setValue(current.position.z);
+};
+      
+controller.x = gui.add(controller.position, 'x').onChange(function(v){
+  controller.current.position.x = v;
+});
+// etc.</pre>
+  </article>
+
+  <article>
+    <h3>How to select?</h3>
+    <p>Project a ray into the scene and find intersecting objects.</p>
+    <pre>
+var projector = new THREE.Projector();
+window.addEventListener('mousedown', function (ev){
+  if (ev.target == renderer.domElement) {
+    var x = ev.clientX;
+    var y = ev.clientY;
+    var v = new THREE.Vector3((x/width)*2-1, -(y/height)*2+1, 0.5);
+    projector.unprojectVector(v, camera);
+    var ray = new THREE.Ray(camera.position, 
+                            v.subSelf(camera.position).normalize());
+    var intersects = ray.intersectObjects(controller.objects);
+    if (intersects.length > 0) {
+      controller.setCurrent(intersects[0].object);
+    }
+  }
+}, false);</pre>
+  </article>
+
+  <article>
+    <h3>Great cubistan</h3>
+    <iframe src="three/three_12.html"></iframe>
+  </article>
+
+  <article class="title">
+    <h2>Loading models</h2>
+  </article>
+
+  <article>
+    <h3>Model exporters</h3>
+    <p>Look into utils/exporters/</p>
+    <ul>
+      <li>blender/</li>
+      <li>fbx/</li>
+      <li>max/</li>
+      <li>utf8/</li>
+      <li>convert_obj_three.py</li>
+    </ul>
+  </article>
+  <article>
+    <h3>Model loaders</h3>
+    <p>Look into src/extras/loaders/</p>
+    <ul>
+      <li>BinaryLoader.js</li>
+      <li>ColladaLoader.js</li>
+      <li>JSONLoader.js</li>
+      <li>SceneLoader.js</li>
+      <li>UTF8Loader.js</li>
+    </ul>
+    <p>Huh? So what should I use?</p>
+  </article>
+  
+  <article>
+    <h3>COLLADA loader</h3>
+    <pre>
+new ColladaLoader().load('models/monster.dae', function(collada) {
+  var model = collada.scene;
+  model.scale.set(0.1, 0.1, 0.1);
+  model.rotation.x = -Math.PI/2;
+  model.updateMatrix();
+  scene.addChild(model);
+});</pre>
+    <p>Doesn't look too complicated.</p>
+    <p>Copy-pasted from examples/webgl_collada.html</p>
+    <p>Along with the code to make it animate.</p>
+  </article>
+
+  <article>
+    <h3>Monster</h3>
+    <iframe src="three/three_13.html"></iframe>
+  </article>
+
+  <article class="title">
+    <h2>Conclusion</h2>
+  </article>
+
+  <article>
+    <h3>Three.js</h3>
+    <p><a href="https://github.com/mrdoob/three.js/">github.com/mrdoob/three.js</a></p>
+    <p>JavaScript library for 3D graphics</p>
+    <p>Easy to use</p>
+    <p>Efficient</p>
+    <p>Nice feature set</p>
+    <p>DAT.GUI for simple GUIs <a href="http://code.google.com/p/dat-gui">code.google.com/p/dat-gui</a></p>
+  </article>
+  
+  <article>
+    <h3>The End</h3>
+    <p>Ilmari Heikkinen</p>
+    <p>@ilmarihei | fhtr.org/plus | fhtr.org</p>
+    <br><br>
+    <p>Slides available at <a href="http://fhtr.org/BasicsOfThreeJS">fhtr.org/BasicsOfThreeJS</a></p>
+  </article>
+
+</section>
+
+<script> 
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-XXXXXX-X']);
+  _gaq.push(['_trackPageview']);
+ 
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script> 
+<!--[if IE]>
+<script src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js"></script>
+<script>CFInstall.check({mode: 'overlay'});</script>
+<![endif]-->
+
+</body>
+</html>
