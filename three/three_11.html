@@ -22,7 +22,7 @@
 
       var width = renderer.domElement.width;
       var height = renderer.domElement.height;
-      var camera = new THREE.Camera( 45, width/height, 1, 10000 );
+      var camera = new THREE.PerspectiveCamera( 45, width/height, 1, 10000 );
       camera.position.y = 30;
       var scene = new THREE.Scene();
       var coordScene = new THREE.Scene();
@@ -32,15 +32,15 @@
         new THREE.CubeGeometry(20,20,20),
         new THREE.MeshPhongMaterial({color: 0xFFFFFF})
       );
-      scene.addChild(cube);
+      scene.add(cube);
 
       var light = new THREE.PointLight(0xFFCC99);
       light.position.set(150, 200, 300);
-      scene.addLight(light);
+      scene.add(light);
 
       var ambient = new THREE.PointLight(0x333366);
       ambient.position.set(-150, -200, -300);
-      scene.addLight(ambient);
+      scene.add(ambient);
 
       function v(x,y,z){ 
         return new THREE.Vertex(new THREE.Vector3(x,y,z)); 
@@ -56,7 +56,7 @@
         color: 0x888888, lineWidth: 1});
       var line = new THREE.Line(lineGeo, lineMat);
       line.type = THREE.Lines;
-      coordScene.addChild(line);
+      coordScene.add(line);
 
       var gui = new DAT.GUI();
 
@@ -98,6 +98,7 @@
           last = t;
           var gl = renderer.getContext();
           renderer.clear();
+          camera.lookAt( scene.position );
           renderer.render(scene, camera);
           renderer.render(coordScene, camera);
         }

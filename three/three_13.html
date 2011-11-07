@@ -41,19 +41,19 @@
       var aspect = width / height; // view aspect ratio
       var near = 1; // near clip plane
       var far = 10000; // far clip plane
-      var camera = new THREE.Camera( fov, aspect, near, far );
+      var camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
       camera.position.z = -400;
       camera.position.x = 200;
       camera.position.y = 350;
       var scene = new THREE.Scene();
 
-      new ColladaLoader().load('models/monster.dae', function(collada) {
+      new THREE.ColladaLoader().load('models/monster.dae', function(collada) {
         var model = collada.scene;
         skin = collada.skins[0];
         model.scale.set(0.1, 0.1, 0.1);
         model.rotation.x = -Math.PI/2;
         model.castShadow = model.receiveShadow = true;
-        scene.addChild(model);
+        scene.add(model);
       });
 
 
@@ -63,12 +63,12 @@
       plane.rotation.x = -Math.PI/2;
       plane.position.y = -25.1;
       plane.receiveShadow = true;
-      scene.addChild(plane);
+      scene.add(plane);
 
       var light = new THREE.SpotLight();
       light.castShadow = true;
       light.position.set( 170, 330, -160 );
-      scene.addLight(light);
+      scene.add(light);
 
       renderer.shadowMapEnabled = true;
 
@@ -111,7 +111,7 @@
             skin.morphTargetInfluences[ Math.floor( st ) ] = 1;
             st += 0.5;
           }
-
+          camera.lookAt( scene.position );
           renderer.render(scene, camera);
         }
         window.requestAnimationFrame(animate, renderer.domElement);

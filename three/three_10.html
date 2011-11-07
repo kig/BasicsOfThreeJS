@@ -21,7 +21,7 @@
 
       var width = renderer.domElement.width;
       var height = renderer.domElement.height;
-      var camera = new THREE.Camera( 45, width/height, 1, 10000 );
+      var camera = new THREE.PerspectiveCamera( 45, width/height, 1, 10000 );
       camera.position.z = 150;
       camera.position.y = 30;
       var scene = new THREE.Scene();
@@ -40,7 +40,7 @@
         color: 0x000000, lineWidth: 1});
       var line = new THREE.Line(lineGeo, lineMat);
       line.type = THREE.Lines;
-      scene.addChild(line);
+      scene.add(line);
 
       line.rotation.y = 0.5;
 
@@ -67,6 +67,7 @@
         if (!paused) {
           last = t;
           renderer.clear();
+          camera.lookAt(scene.position);
           renderer.render(scene, camera);
         }
         window.requestAnimationFrame(animate, renderer.domElement);

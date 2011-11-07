@@ -34,14 +34,14 @@
       var aspect = width / height; // view aspect ratio
       var near = 1; // near clip plane
       var far = 10000; // far clip plane
-      var camera = new THREE.Camera( fov, aspect, near, far );
+      var camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
       camera.position.z = 300;
       var scene = new THREE.Scene();
       var cube = new THREE.Mesh(
         new THREE.CubeGeometry(50,50,50),
         new THREE.MeshBasicMaterial({color: 0x000000, opacity: 1})
       );
-      scene.addChild(cube);
+      scene.add(cube);
       renderer.render(scene, camera);
     </script>
   </body>

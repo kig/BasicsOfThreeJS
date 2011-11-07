@@ -115,18 +115,18 @@ Author: Eric Bidelman (ericbidelman@chromium.org)
     <div>
     <p>Create a Camera</p>
     <pre>
-      // new THREE.Camera( FOV, viewAspectRatio, zNear, zFar );
-      var camera = new THREE.Camera( 45, width/height, 1, 10000 );
-      camera.position.z = 300;</pre>
+// new THREE.PerspectiveCamera( FOV, viewAspectRatio, zNear, zFar );
+var camera = new THREE.PerspectiveCamera(45, width/height, 1, 10000);
+camera.position.z = 300;</pre>
     <p>Make a Scene with a Cube</p>
     <pre>
-      var scene = new THREE.Scene();
-      var cube = new THREE.Mesh(new THREE.CubeGeometry(50,50,50),
-                     new THREE.MeshBasicMaterial({color: 0x000000}));
-      scene.addChild(cube);</pre>
+var scene = new THREE.Scene();
+var cube = new THREE.Mesh(new THREE.CubeGeometry(50,50,50),
+               new THREE.MeshBasicMaterial({color: 0x000000}));
+scene.add(cube);</pre>
     <p>And render the Scene from the Camera</p>
     <pre>
-      renderer.render(scene, camera);</pre>
+renderer.render(scene, camera);</pre>
     </div>
   </article>
 
@@ -138,11 +138,11 @@ Author: Eric Bidelman (ericbidelman@chromium.org)
   <article>
     <h3>Recap</h3>
     <p>Create a renderer <code>new THREE.WebGLRenderer()</code></p>
-    <p>Create a camera <code>new THREE.Camera(fov, aspect, near, far)</code></p>
+    <p>Create a camera <code>new THREE.PerspectiveCamera(fov, aR, n, f)</code></p>
     <p>Create a scene <code>new THREE.Scene()</code></p>
     <p>Create a mesh with a geometry and a material<code><br>new THREE.Mesh(new THREE.CubeGeometry(w,h,d),<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new THREE.MeshBasicMaterial({color: 0x000000}))</code>
     </p>
-    <p>Add the mesh to the scene <code>scene.addChild(mesh)</code></p>
+    <p>Add the mesh to the scene <code>scene.add(mesh)</code></p>
     <p>Render the scene <code>renderer.render(scene, camera)</code></p>
     <p>Add the renderer canvas to the page <code>document.body.appendChild(renderer.domElement)</code></p>
   </article>
@@ -161,6 +161,8 @@ Author: Eric Bidelman (ericbidelman@chromium.org)
         camera.position.x = Math.sin(t/1000)*300;
         camera.position.y = 150;
         camera.position.z = Math.cos(t/1000)*300;
+        // you need to update lookAt every frame
+        camera.lookAt(scene.position);
         // renderer automatically clears unless autoClear = false
         renderer.render(scene, camera);
         window.requestAnimationFrame(animate, renderer.domElement);
@@ -198,14 +200,14 @@ Author: Eric Bidelman (ericbidelman@chromium.org)
     <pre>
       var light = new THREE.SpotLight();
       light.position.set( 170, 330, -160 );
-      scene.addLight(light);</pre>
+      scene.add(light);</pre>
     <p>And a lit cube</p>
     <pre>
       var litCube = new THREE.Mesh(
         new THREE.CubeGeometry(50, 50, 50),
         new THREE.MeshLambertMaterial({color: 0xFFFFFF}));
       litCube.position.y = 50;
-      scene.addChild(litCube);</pre>
+      scene.add(litCube);</pre>
   </article>
 
   <article>
@@ -240,7 +242,7 @@ Author: Eric Bidelman (ericbidelman@chromium.org)
   plane.rotation.x = -Math.PI/2;
   plane.position.y = -25;
   plane.receiveShadow = true;
-  scene.addChild(plane);</pre>
+  scene.add(plane);</pre>
     <p>And make the cube spin</p>
     <pre>
   litCube.position.x = Math.cos(t/600)*85;
@@ -259,7 +261,7 @@ Author: Eric Bidelman (ericbidelman@chromium.org)
     <h3>Lighting recap</h3>
     <p>Set mesh material to <code>new THREE.MeshLambertMaterial</code> or <code>new THREE.MeshPhongMaterial</code></p>
     <p>Create a light <code>new THREE.SpotLight(color)</code></p>
-    <p>Add the light to the scene <code>scene.addLight(light)</code></p>
+    <p>Add the light to the scene <code>scene.add(light)</code></p>
     <p>Turn on shadows if you need them</p>
     <pre>
       renderer.shadowMapEnabled = true;
@@ -373,7 +375,7 @@ var meshCube = new THREE.Mesh(
     <pre>
       var grid = /* 2D Array */
       var barGraph = new THREE.Object3D();
-      scene.addChild(barGraph);
+      scene.add(barGraph);
 
       var max = /* Grid max value */
       var mat = new THREE.MeshLambertMaterial({color: 0xFFAA55});
@@ -386,7 +388,7 @@ var meshCube = new THREE.Mesh(
           mesh.position.y = barHeight/2;
           mesh.position.z = -(j-grid.length/2) * 16;
           mesh.castShadow = mesh.receiveShadow = true;
-          barGraph.addChild(mesh);
+          barGraph.add(mesh);
         }
       }</pre>
   </article>
@@ -414,7 +416,7 @@ for (var i=0; i&lt;pointCount; i++) {
     (x+50)/100, (z+50)/100, (y+50)/100));
 }
 var points = new THREE.ParticleSystem(pointGeo, mat);
-scatterPlot.addChild(points);
+scatterPlot.add(points);
 scene.fog = new THREE.FogExp2(0xFFFFFF, 0.0035);</pre>
   </article>
 
@@ -468,7 +470,7 @@ scene.fog = new THREE.FogExp2(0xFFFFFF, 0.0035);</pre>
         color: 0x000000, lineWidth: 1});
       var line = new THREE.Line(lineGeo, lineMat);
       line.type = THREE.Lines;
-      scene.addChild(line);</pre>
+      scene.add(line);</pre>
   </article>
   
   <article>
@@ -580,7 +582,7 @@ new ColladaLoader().load('models/monster.dae', function(collada) {
   var model = collada.scene;
   model.scale.set(0.1, 0.1, 0.1);
   model.rotation.x = -Math.PI/2;
-  scene.addChild(model);
+  scene.add(model);
 });</pre>
     <p>Doesn't look too complicated.</p>
     <p>Copy-pasted from examples/webgl_collada.html</p>

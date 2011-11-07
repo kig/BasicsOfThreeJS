@@ -40,7 +40,7 @@
       var aspect = width / height; // view aspect ratio
       var near = 1; // near clip plane
       var far = 10000; // far clip plane
-      var camera = new THREE.Camera( fov, aspect, near, far );
+      var camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
       camera.position.z = -400;
       camera.position.x = 200;
       camera.position.y = 350;
@@ -49,7 +49,7 @@
         new THREE.CubeGeometry(50,50,50),
         new THREE.MeshLambertMaterial({color: 0xff0000})
       );
-      scene.addChild(cube);
+      scene.add(cube);
       cube.castShadow = true;
       cube.receiveShadow = true;
 
@@ -59,18 +59,18 @@
       plane.rotation.x = -Math.PI/2;
       plane.position.y = -25.1;
       plane.receiveShadow = true;
-      scene.addChild(plane);
+      scene.add(plane);
 
       var light = new THREE.SpotLight();
       light.castShadow = true;
       light.position.set( 170, 330, -160 );
-      scene.addLight(light);
+      scene.add(light);
       var litCube = new THREE.Mesh(
         new THREE.CubeGeometry(50, 50, 50),
         new THREE.MeshLambertMaterial({color: 0xffffff}));
       litCube.position.y = 50;
       litCube.castShadow = true;
-      scene.addChild(litCube);
+      scene.add(litCube);
 
       renderer.shadowMapEnabled = true;
 
@@ -103,6 +103,7 @@
           litCube.rotation.x = t/500;
           litCube.rotation.y = t/800;
           renderer.clear();
+          camera.lookAt(scene.position);
           renderer.render(scene, camera);
         }
         window.requestAnimationFrame(animate, renderer.domElement);

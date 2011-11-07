@@ -68,7 +68,7 @@
         var height = Math.abs(u.y - v.y);
         plane.position.x = (width/2) * horizontalAlign;
         plane.position.y = (height/2) * verticalAlign;
-        obj.addChild(plane);
+        obj.add(plane);
         return obj;
       }
 
@@ -84,7 +84,7 @@
       renderer.shadowMapHeight = 1024;
       renderer.shadowCameraFov = 35;
 
-      var camera = new THREE.Camera( 45, w/h, 1, 10000 );
+      var camera = new THREE.PerspectiveCamera( 45, w/h, 1, 10000 );
       camera.position.z = 200;
       camera.position.x = -100;
       camera.position.y = 150;
@@ -94,11 +94,11 @@
       var light = new THREE.SpotLight();
       light.castShadow = true;
       light.position.set( -170, 300, 100 );
-      scene.addLight(light);
+      scene.add(light);
 
       var ambientLight = new THREE.PointLight(0x442255);
       ambientLight.position.set(20, 150, -120);
-      scene.addLight(ambientLight);
+      scene.add(ambientLight);
 
       var plane = new THREE.Mesh(
         new THREE.CubeGeometry(180, 80, 180), 
@@ -106,7 +106,7 @@
       plane.position.y = -40;
       plane.receiveShadow = true;
       plane.doubleSided = true;
-      scene.addChild(plane);
+      scene.add(plane);
 
       var grid = [];
       for (var y=0; y<9; y++) {
@@ -117,7 +117,7 @@
       }
 
       var barGraph = new THREE.Object3D();
-      scene.addChild(barGraph);
+      scene.add(barGraph);
 
       var max = grid.reduce(function(s,i){ 
         return Math.max(s, Math.max.apply(null, i)); 
@@ -130,7 +130,7 @@
         title.position.z = -(j-(grid.length-1)/2) * 16;
         title.position.y = 1;
         title.rotation.x = -Math.PI/2;
-        barGraph.addChild(title);
+        barGraph.add(title);
       }
       for (var j=0; j<grid[0].length; j++) {
         var array = grid[0];
@@ -141,7 +141,7 @@
         title.position.z = -(-1-(grid.length-1)/2) * 16;
         title.position.y = 1;
         title.rotation.x = -Math.PI/2;
-        barGraph.addChild(title);
+        barGraph.add(title);
       }
       for (var j=0; j<grid.length; j++) {
         var array = grid[j];
@@ -155,7 +155,7 @@
           mesh.position.y = barHeight/2;
           mesh.position.z = -(j-(grid.length-1)/2) * 16;
           mesh.castShadow = mesh.receiveShadow = true;
-          barGraph.addChild(mesh);
+          barGraph.add(mesh);
         }
       }
 
@@ -167,7 +167,6 @@
       var rot = Math.PI/3;
       camera.position.x = Math.cos(rot)*170;
       camera.position.z = Math.sin(rot)*170;
-      camera.target.position.y = 0;
       window.onmousedown = function (ev){
         down = true; sx = ev.clientX; sy = ev.clientY;
       };
@@ -188,6 +187,7 @@
         if (!paused) {
           last = t;
           renderer.clear();
+          camera.lookAt(scene.position);
           renderer.render(scene, camera);
         }
         window.requestAnimationFrame(animate, renderer.domElement);

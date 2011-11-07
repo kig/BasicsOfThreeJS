@@ -53,7 +53,7 @@
 
       renderer.setClearColorHex(0xEEEEEE, 1.0);
 
-      var camera = new THREE.Camera( 45, w/h, 1, 10000 );
+      var camera = new THREE.PerspectiveCamera( 45, w/h, 1, 10000 );
       camera.position.z = 200;
       camera.position.x = 0;
       camera.position.y = 75;
@@ -62,7 +62,7 @@
       scene.fog = new THREE.FogExp2( 0xFFFFFF, 0.0035 );
 
       var scatterPlot = new THREE.Object3D();
-      scene.addChild(scatterPlot);
+      scene.add(scatterPlot);
 
       scatterPlot.rotation.y = 0.5;
       function v(x,y,z){ return new THREE.Vertex(new THREE.Vector3(x,y,z)); }
@@ -106,31 +106,31 @@
       var lineMat = new THREE.LineBasicMaterial({color: 0x808080, lineWidth: 1});
       var line = new THREE.Line(lineGeo, lineMat);
       line.type = THREE.Lines;
-      scatterPlot.addChild(line);
+      scatterPlot.add(line);
 
       var titleX = createText2D('-X');
       titleX.position.x = -60;
-      scatterPlot.addChild(titleX);
+      scatterPlot.add(titleX);
 
       var titleX = createText2D('X');
       titleX.position.x = 60;
-      scatterPlot.addChild(titleX);
+      scatterPlot.add(titleX);
 
       var titleX = createText2D('-Y');
       titleX.position.y = -60;
-      scatterPlot.addChild(titleX);
+      scatterPlot.add(titleX);
 
       var titleX = createText2D('Y');
       titleX.position.y = 60;
-      scatterPlot.addChild(titleX);
+      scatterPlot.add(titleX);
 
       var titleX = createText2D('-Z');
       titleX.position.z = -60;
-      scatterPlot.addChild(titleX);
+      scatterPlot.add(titleX);
 
       var titleX = createText2D('Z');
       titleX.position.z = 60;
-      scatterPlot.addChild(titleX);
+      scatterPlot.add(titleX);
 
       var mat = new THREE.ParticleBasicMaterial({vertexColors:true, size: 1.5});
 
@@ -148,7 +148,7 @@
           (x+50)/100, (z+50)/100, (y+50)/100));
       }
       var points = new THREE.ParticleSystem(pointGeo, mat);
-      scatterPlot.addChild(points);
+      scatterPlot.add(points);
 
       renderer.render(scene, camera);
       var paused = false;
@@ -185,6 +185,7 @@
             pointGeo.__dirtyVertices = true;
           }
           renderer.clear();
+          camera.lookAt(scene.position);
           renderer.render(scene, camera);
         }
         window.requestAnimationFrame(animate, renderer.domElement);

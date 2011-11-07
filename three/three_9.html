@@ -35,7 +35,7 @@
       var aspect = width / height; // view aspect ratio
       var near = 1; // near clip plane
       var far = 10000; // far clip plane
-      var camera = new THREE.Camera( fov, aspect, near, far );
+      var camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
       camera.position.z = 500;
       camera.position.y = 150;
       var scene = new THREE.Scene();
@@ -61,7 +61,7 @@
       );
       titleQuad.doubleSided = true;
 
-      scene.addChild(titleQuad);
+      scene.add(titleQuad);
 
       titleQuad.rotation.y = 0.5;
 
@@ -88,6 +88,7 @@
         if (!paused) {
           last = t;
           renderer.clear();
+          camera.lookAt(scene.position);
           renderer.render(scene, camera);
         }
         window.requestAnimationFrame(animate, renderer.domElement);
