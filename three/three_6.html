@@ -74,7 +74,7 @@
       };
       var cube = new THREE.Mesh(
         new THREE.CubeGeometry(50, 50, 50, 20,20,20),
-        new THREE.MeshShaderMaterial({
+        new THREE.ShaderMaterial({
           uniforms : uniforms,
           vertexShader : document.getElementById('vertex').textContent,
           fragmentShader : document.getElementById('fragment').textContent

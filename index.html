@@ -334,14 +334,14 @@ renderer.render(scene, camera);</pre>
 
   <article>
     <h3>Shaders and Three.js</h3>
-    <p>Use a MeshShaderMaterial</p>
+    <p>Use a ShaderMaterial</p>
     <pre>
 var uniforms = {
   time : { type: "f", value: 1.0 },
   size : { type: "v2", value: new THREE.Vector2(width,height) }
 };
 
-var shaderMaterial = new THREE.MeshShaderMaterial({
+var shaderMaterial = new THREE.ShaderMaterial({
   uniforms : uniforms,
   vertexShader : $('#vertex').text(),
   fragmentShader : $('#fragment').text()
@@ -578,7 +578,8 @@ window.addEventListener('mousedown', function (ev){
   <article>
     <h3>COLLADA loader</h3>
     <pre>
-new ColladaLoader().load('models/monster.dae', function(collada) {
+new THREE.ColladaLoader().load('models/monster.dae',
+function(collada) {
   var model = collada.scene;
   model.scale.set(0.1, 0.1, 0.1);
   model.rotation.x = -Math.PI/2;
